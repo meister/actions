@@ -85,7 +85,7 @@ jobs:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 
-      - run: npm run eslint
+      - run: npm run lint
 
   sonar:
     runs-on: ubuntu-latest
