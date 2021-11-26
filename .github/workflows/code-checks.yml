@@ -29,11 +29,6 @@ jobs:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 
-      - uses: actions/cache@v2
-        with:
-          path: /home/runner/.sonar/cache
-          key: ${{ runner.os }}-sonar
-
       - run: npm install
         # env:
         #   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -41,5 +36,60 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: setup
+
     steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Read .nvmrc
+        run: echo ::set-output name=NVMRC::$(cat .nvmrc)
+        id: nvm
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "${{ steps.nvm.outputs.NVMRC }}"
+          registry-url: https://npm-registry-proxy.pipedrive.tools
+          scope: "@pipedrive"
+
+      - uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
       - run: npm test
+
+  sonar:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Read .nvmrc
+        run: echo ::set-output name=NVMRC::$(cat .nvmrc)
+        id: nvm
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "${{ steps.nvm.outputs.NVMRC }}"
+          registry-url: https://npm-registry-proxy.pipedrive.tools
+          scope: "@pipedrive"
+
+      - uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+      - uses: actions/cache@v2
+        with:
+          path: /home/runner/.sonar/cache
+          key: ${{ runner.os }}-sonar
+
+      - run: echo 'sonar-scanner'
+      - run: ls -l /home/runner/.sonar/cache
+      - run: touch /home/runner/.sonar/cache/tmp-asdf
