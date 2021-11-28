@@ -2,6 +2,7 @@ name: Static Code Analysis
 on:
   # push:
   pull_request_target:
+    types: [assigned, opened, synchronize, reopened]
     branches:
       - master
 
@@ -21,8 +22,6 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '${{ steps.nvm.outputs.NVMRC }}'
-          registry-url: https://npm-registry-proxy.pipedrive.tools
-          scope: '@pipedrive'
 
       - uses: actions/cache@v2
         with:
@@ -30,8 +29,6 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 
       - run: npm install
-        # env:
-        #   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   test:
     runs-on: ubuntu-latest
