@@ -20,13 +20,13 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-          node-version: "${{ steps.nvm.outputs.NVMRC }}"
+          node-version: '${{ steps.nvm.outputs.NVMRC }}'
           registry-url: https://npm-registry-proxy.pipedrive.tools
-          scope: "@pipedrive"
+          scope: '@pipedrive'
 
       - uses: actions/cache@v2
         with:
-          path: "**/node_modules"
+          path: '**/node_modules'
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 
       - run: npm install
@@ -49,13 +49,13 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-          node-version: "${{ steps.nvm.outputs.NVMRC }}"
+          node-version: '${{ steps.nvm.outputs.NVMRC }}'
           registry-url: https://npm-registry-proxy.pipedrive.tools
-          scope: "@pipedrive"
+          scope: '@pipedrive'
 
       - uses: actions/cache@v2
         with:
-          path: "**/node_modules"
+          path: '**/node_modules'
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 
       - run: npm test
@@ -76,15 +76,14 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-          node-version: "${{ steps.nvm.outputs.NVMRC }}"
-          registry-url: https://npm-registry-proxy.pipedrive.tools
-          scope: "@pipedrive"
+          node-version: '${{ steps.nvm.outputs.NVMRC }}'
 
       - uses: actions/cache@v2
         with:
-          path: "**/node_modules"
+          path: '**/node_modules'
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 
+      - run: npm install
       - run: npm run lint
 
   sonar:
@@ -94,8 +93,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          fetch-depth: 2
           ref: ${{ github.head_ref }}
+
+      - run: |
+          git fetch origin
+          ${{ github.event.pull_request.base.ref }}:refs/remotes/origin/${{ github.event.pull_request.base.ref }}
 
       - name: Read .nvmrc
         run: echo ::set-output name=NVMRC::$(cat .nvmrc)
@@ -103,14 +106,15 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-          node-version: "${{ steps.nvm.outputs.NVMRC }}"
-          registry-url: https://npm-registry-proxy.pipedrive.tools
-          scope: "@pipedrive"
+          node-version: '${{ steps.nvm.outputs.NVMRC }}'
 
       - uses: actions/cache@v2
         with:
-          path: "**/node_modules"
+          path: '**/node_modules'
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+      - run: npm install
+      - run: npm run coverage
 
       - uses: actions/cache@v2
         with:

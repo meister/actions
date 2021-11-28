@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "lint": "eslint"
   },
   "author": "",
@@ -16,5 +18,8 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.1",
     "jest": "^27.3.1"
+  },
+  "jest": {
+    "transform": {}
   }
 }
