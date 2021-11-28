@@ -1,9 +1,9 @@
-name: On Commit
+name: Static Code Analysis
 on:
-  push:
-  # pull_request_target:
-  #   branches:
-  #     - master
+  # push:
+  pull_request_target:
+    branches:
+      - master
 
 jobs:
   setup:
