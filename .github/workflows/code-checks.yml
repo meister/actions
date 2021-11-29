@@ -101,18 +101,12 @@ jobs:
       - run: git branch --list
       - run: git branch --show-current
 
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
-          ref: ${{ github.head_ref }}
-          clean: false
-
-      - run: git branch --list
-      - run: git branch --show-current
-
       - run: |
           git fetch origin \
           ${{ github.base_ref }}:${{ github.base_ref }}
+
+      - run: git branch --list
+      - run: git branch --show-current
 
       - name: Read .nvmrc
         run: echo ::set-output name=NVMRC::$(cat .nvmrc)
