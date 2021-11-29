@@ -104,7 +104,8 @@ jobs:
           git fetch --no-tags --depth=1 \
           origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
           git checkout -b ${{ github.base_ref }}
-          git checkout ${{ github.event.pull_request.head.sha }}
+          git switch -
+          git checkout ${{ github.event.pull_request.head.ref }}
 
       - run: git branch --list
       - run: git branch --show-current
