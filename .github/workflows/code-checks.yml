@@ -98,6 +98,9 @@ jobs:
           fetch-depth: 2
           ref: ${{ github.base_ref }}
 
+      - run: git branch --list
+      - run: git branch --show-current
+
       - uses: actions/checkout@v2
         with:
           fetch-depth: 2
