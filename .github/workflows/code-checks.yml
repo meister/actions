@@ -9,8 +9,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          fetch-depth: 2
           ref: ${{ github.head_ref }}
+
+      - run: git branch --list
+      - run: git branch --show-current
 
       - name: Dump GitHub context
         env:
@@ -37,11 +40,6 @@ jobs:
     needs: setup
 
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
-          ref: ${{ github.base_ref }}
-
       - uses: actions/checkout@v2
         with:
           fetch-depth: 2
@@ -98,7 +96,16 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 2
+          ref: ${{ github.base_ref }}
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
           ref: ${{ github.head_ref }}
+          clean: false
+
+      - run: git branch --list
+      - run: git branch --show-current
 
       - run: |
           git fetch origin \
