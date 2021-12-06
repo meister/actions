@@ -132,7 +132,7 @@ jobs:
       - run: echo 'npm run sonar'
         env:
           SONAR_TOKEN: fake-sonar-token
-          SONAR_SCM_REVISION: ${{ github.event.pull_request.head.sha || github.head_ref }}
+          SONAR_SCM_REVISION: ${{ github.event.pull_request.head.sha }}
           SONAR_TARGET_BRANCH: ${{ github.event.pull_request.base.ref || 'master' }}
           CI_PR_NUMBER: ${{ github.event.number }}
           CI_BRANCH: ${{ github.head_ref }}
