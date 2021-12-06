@@ -1,9 +1,7 @@
-name: On Commit
+name: Static Code Analysis
 on:
-  push:
-  # pull_request_target:
-  #   branches:
-  #     - master
+  # push:
+  pull_request:
 
 jobs:
   setup:
@@ -11,8 +9,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          fetch-depth: 2
           ref: ${{ github.head_ref }}
+
+      - run: git branch --list
+      - run: git branch --show-current
+
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
 
       - name: Read .nvmrc
         run: echo ::set-output name=NVMRC::$(cat .nvmrc)
@@ -20,18 +26,14 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-          node-version: "${{ steps.nvm.outputs.NVMRC }}"
-          registry-url: https://npm-registry-proxy.pipedrive.tools
-          scope: "@pipedrive"
+          node-version: '${{ steps.nvm.outputs.NVMRC }}'
 
       - uses: actions/cache@v2
         with:
-          path: "**/node_modules"
+          path: '**/node_modules'
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 
       - run: npm install
-        # env:
-        #   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   test:
     runs-on: ubuntu-latest
@@ -40,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          fetch-depth: 2
           ref: ${{ github.head_ref }}
 
       - name: Read .nvmrc
@@ -49,13 +51,13 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-          node-version: "${{ steps.nvm.outputs.NVMRC }}"
+          node-version: '${{ steps.nvm.outputs.NVMRC }}'
           registry-url: https://npm-registry-proxy.pipedrive.tools
-          scope: "@pipedrive"
+          scope: '@pipedrive'
 
       - uses: actions/cache@v2
         with:
-          path: "**/node_modules"
+          path: '**/node_modules'
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 
       - run: npm test
@@ -76,15 +78,14 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-          node-version: "${{ steps.nvm.outputs.NVMRC }}"
-          registry-url: https://npm-registry-proxy.pipedrive.tools
-          scope: "@pipedrive"
+          node-version: '${{ steps.nvm.outputs.NVMRC }}'
 
       - uses: actions/cache@v2
         with:
-          path: "**/node_modules"
+          path: '**/node_modules'
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 
+      - run: npm install
       - run: npm run lint
 
   sonar:
@@ -94,8 +95,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
           ref: ${{ github.head_ref }}
+
+      - run: |
+          git fetch --no-tags --depth=1 \
+          origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
+          git checkout -b ${{ github.base_ref }}
+          git switch -
+          git checkout ${{ github.event.pull_request.head.ref }}
 
       - name: Read .nvmrc
         run: echo ::set-output name=NVMRC::$(cat .nvmrc)
@@ -103,21 +110,29 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-          node-version: "${{ steps.nvm.outputs.NVMRC }}"
-          registry-url: https://npm-registry-proxy.pipedrive.tools
-          scope: "@pipedrive"
+          node-version: '${{ steps.nvm.outputs.NVMRC }}'
 
       - uses: actions/cache@v2
         with:
-          path: "**/node_modules"
+          path: '**/node_modules'
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+      - run: npm install
+      - run: npm run coverage
 
       - uses: actions/cache@v2
         with:
           path: /home/runner/.sonar/cache
           key: ${{ runner.os }}-sonar
 
-      - run: echo 'sonar-scanner'
+      - run: echo 'npm run sonar'
+        env:
+          SONAR_TOKEN: fake-sonar-token
+          SONAR_SCM_REVISION: ${{ github.event.pull_request.head.sha || github.head_ref }}
+          SONAR_TARGET_BRANCH: ${{ github.event.pull_request.base.ref || 'master' }}
+          CI_PR_NUMBER: ${{ github.event.number }}
+          CI_BRANCH: ${{ github.head_ref }}
+
       - run: ls -l /home/runner/.sonar/cache || true
       - run: |
           mkdir -p /home/runner/.sonar/cache/ &&
