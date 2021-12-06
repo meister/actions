@@ -2,8 +2,6 @@ name: Static Code Analysis
 on:
   # push:
   pull_request:
-    types:
-      - synchronize
 
 jobs:
   setup:
@@ -11,8 +9,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          fetch-depth: 2
           ref: ${{ github.head_ref }}
+
+      - run: git branch --list
+      - run: git branch --show-current
 
       - name: Dump GitHub context
         env:
@@ -41,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          fetch-depth: 2
           ref: ${{ github.head_ref }}
 
       - name: Read .nvmrc
@@ -94,12 +95,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 2
           ref: ${{ github.head_ref }}
 
       - run: |
-          git fetch origin \
-          ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
+          git fetch --no-tags --depth=1 \
+          origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
+          git checkout -b ${{ github.base_ref }}
+          git switch -
+          git checkout ${{ github.event.pull_request.head.ref }}
 
       - name: Read .nvmrc
         run: echo ::set-output name=NVMRC::$(cat .nvmrc)
@@ -122,7 +125,14 @@ jobs:
           path: /home/runner/.sonar/cache
           key: ${{ runner.os }}-sonar
 
-      - run: echo 'sonar-scanner'
+      - run: echo 'npm run sonar'
+        env:
+          SONAR_TOKEN: fake-sonar-token
+          SONAR_SCM_REVISION: ${{ github.event.pull_request.head.sha || github.head_ref }}
+          SONAR_TARGET_BRANCH: ${{ github.event.pull_request.base.ref || 'master' }}
+          CI_PR_NUMBER: ${{ github.event.number }}
+          CI_BRANCH: ${{ github.head_ref }}
+
       - run: ls -l /home/runner/.sonar/cache || true
       - run: |
           mkdir -p /home/runner/.sonar/cache/ &&
