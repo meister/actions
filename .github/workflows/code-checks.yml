@@ -2,7 +2,9 @@ name: Static Code Analysis
 on:
   # push:
   pull_request:
-  pull_request_target:
+  push:
+    branches:
+      - master
 
 jobs:
   setup:
@@ -104,6 +106,7 @@ jobs:
           git checkout -b ${{ github.base_ref }}
           git switch -
           git checkout ${{ github.event.pull_request.head.ref }}
+        if: github.event_name == 'pull_request'
 
       - name: Read .nvmrc
         run: echo ::set-output name=NVMRC::$(cat .nvmrc)
